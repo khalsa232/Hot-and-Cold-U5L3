@@ -1,7 +1,7 @@
 /* === Imports === */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js"
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js"
 
 /* === Firebase Setup === */
 const firebaseConfig = {
@@ -28,6 +28,8 @@ console.log(db)
 
 const viewLoggedOut = document.getElementById("logged-out-view")
 const viewLoggedIn = document.getElementById("logged-in-view")
+
+const navbar = document.getElementById("navbar")
 
 const signInWithGoogleButtonEl = document.getElementById("sign-in-with-google-btn")
 
@@ -139,12 +141,14 @@ function authSignOut() {
 function showLoggedOutView() {
     hideView(viewLoggedIn)
     showView(viewLoggedOut)
+    hideView(navbar)
 }
  
  
 function showLoggedInView() {
     hideView(viewLoggedOut)
     showView(viewLoggedIn)
+    showView(navbar)
 }
  
  
@@ -209,51 +213,36 @@ function showUserGreeting(element, user) {
 }
 
 function clearInputField(field) {
-    field = ""
+    field.value = ""
 }
 
 function postButtonPressed() {
     const postBody = textareaEl.value
-   
+    const user = auth.currentUser
+    const time = serverTimestamp()
+
     if (postBody) {
-        addPostToDB(postBody)
+        addPostToDB(postBody, user, time)
         clearInputField(textareaEl)
     }
 }
  
 /* = Functions - Firebase - Cloud Firestore = */
-
-
-async function addPostToDB(postBody) {
-    /*  Challenge:
-         Import collection and addDoc from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js"
-
-        Use the code from the documentation to make this function work.
-       
-        The function should add a new document to the "posts" collection in Firestore.
-       
-        The document should contain a field called 'body' of type "string" with a value of
-        postBody (from function parameter)
-       
-        If the document was written successfully, then console log
-        "Document written with ID: {documentID}"
-        Where documentID is the actual ID of the newly created document.
-       
-        If something went wrong, then you should log the error message using console.error
-    */
-
+async function addPostToDB(postBody, user, time) {
     try {
         const docRef = await addDoc(collection(db, "posts"), {
-            body: postBody
+            body: postBody,
+            uid: user.uid,
+            timestamp: time
         })
-        console.log(`Document written with ID: ${docRef}`)
+        console.log(`Document written with ID: ${docRef.id}`)
     } catch (error) {
-        console.error(error)
+        console.error(error.message)
     }
 }
  
  
-// console.log(app.options.projectId)
+console.log(app.options.projectId)
 
 // Main Code
 onAuthStateChanged(auth, (user) => {
@@ -265,8 +254,6 @@ onAuthStateChanged(auth, (user) => {
         showLoggedOutView()
     }
 })
-
-
 
 
 //credit: coursera

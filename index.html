@@ -2,7 +2,7 @@
 <html>
 
     <head>
-        <title>Hot-and-Cold</title>
+        <title>ShareLemon</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,9 +11,21 @@
     </head>
 
     <body>
+        <nav id="navbar">
+            <img src="assets/logo/lemon-logo.png" class="logo">
+            <div class="search-container">
+                <img src="assets/icons/search-icon.png" class="search-icon">
+                <input id="search" type="search" placeholder="Search">
+            </div>
+            
+            <button id="sign-out-btn" class="icon-img-btn">
+                <img src="assets/icons/sign-out-icon.png" class="icon-img-btn">
+            </button>
+        </nav>
+        
         <section id="logged-out-view">
             <div class="container">
-                <h1 class="app-title">Hot-and-Cold</h1>
+                <h1 class="app-title">ShareLemon</h1>
                 
                 <div class="provider-buttons">
                     <button id="sign-in-with-google-btn" class="provider-btn">
@@ -35,12 +47,7 @@
         <section id="logged-in-view">
             <div class="container">
                 <!-- log out button-->
-                <nav>
-                    <button id="sign-out-btn" class="icon-img-btn">
-                        <img src="assets/icons/logOut.jpg" class="icon-img-btn">
-                    </button>
-                </nav>
-
+                
                 <div class="app-container">
                     <div class="user-section">
                         <img id="user-profile-picture">
