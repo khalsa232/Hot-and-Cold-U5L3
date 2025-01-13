@@ -313,7 +313,11 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 1em;
- }
+}
+
+.post-container {
+    display: block;
+}
  
 /* === IDs === */
 

@@ -223,6 +223,7 @@ function postButtonPressed() {
 
     if (postBody) {
         addPostToDB(postBody, user, time)
+        addPostToWeb(postBody, user, time)
         clearInputField(textareaEl)
     }
 }
@@ -243,6 +244,38 @@ async function addPostToDB(postBody, user, time) {
  
  
 console.log(app.options.projectId)
+
+function addPostToWeb(postBody, user, time) {
+    
+    let post = document.getElementById("post")
+
+    let username = document.getElementById("user")
+    console.log(user.uid)
+    username.textContent = user.uid
+
+    let postDescription = document.getElementById("body")
+    postDescription.textContent = postBody
+
+    let timePosted = document.getElementById("timePosted")
+
+    const date = new Date(time.toString())
+    timePosted.textContent = date
+    // let post = document.createElement("div")
+    // post.innerHTML = "<p>test</p>"
+    // post.className = "post-container"
+    // let username = document.createElement("h1")
+    // username.textContent = user.uid
+    // let contentOfPost = document.createElement("p")
+    // contentOfPost.textContent = postBody
+    // document.createElement("div")
+
+
+
+    document.appendChild(post)
+    
+    
+
+}
 
 // Main Code
 onAuthStateChanged(auth, (user) => {
