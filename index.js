@@ -1,7 +1,7 @@
 /* === Imports === */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js"
+import { getFirestore, collection, addDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js"
 
 /* === Firebase Setup === */
 const firebaseConfig = {
@@ -75,14 +75,6 @@ function authSignInWithGoogle() {
 
 function authSignInWithEmail() {
     console.log("Sign in with email and password")
-    /*  Challenge:
-  1  Import the signInWithEmailAndPassword function from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js"
-  2 Use the code from the documentation to make this function work.
-  3  Make sure to first create two consts, 'email' and 'password', to fetch the values from the input fields emailInputEl and passwordInputEl.
-   4 If the login is successful then you should show the logged in view using showLoggedInView()
-   5   If something went wrong, then you should log the error message using console.error.
-    */
-
     const email = emailInputEl.value
     const password = passwordInputEl.value
     signInWithEmailAndPassword(auth, email, password)
@@ -98,13 +90,6 @@ function authSignInWithEmail() {
 
 function authCreateAccountWithEmail() {
     console.log("Sign up with email and password")
-        /*  Challenge:
-    1 Import the createUserWithEmailAndPassword function from from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-       2 Use the code from the documentation to make this function work.
-       3 Make sure to first create two consts, 'email' and 'password', to fetch the values from the input fields emailInputEl and passwordInputEl.
-       4 If the creation of user is successful then you should show the logged in view using showLoggedInView()
-       5 If something went wrong, then you should log the error message using console.error.
-    */
     const email = emailInputEl.value
     const password = passwordInputEl.value
     createUserWithEmailAndPassword(auth, email, password)
@@ -119,14 +104,6 @@ function authCreateAccountWithEmail() {
 
 
 function authSignOut() {
-    /*  Challenge:
-         Import the signOut function from 'firebase/auth'
-        Use the code from the documentation to make this function work.
-   
-        If the log out is successful then you should show the logged out view using showLoggedOutView()
-        If something went wrong, then you should log the error message using console.error.
-    */
-
     signOut(auth)
         .then(() => {
             showLoggedOutView()
@@ -140,22 +117,25 @@ function authSignOut() {
 /* == Functions - UI Functions == */
 function showLoggedOutView() {
     hideView(viewLoggedIn)
-    showView(viewLoggedOut)
+    showViewFlex(viewLoggedOut)
     hideView(navbar)
 }
  
  
 function showLoggedInView() {
     hideView(viewLoggedOut)
-    showView(viewLoggedIn)
-    showView(navbar)
+    showViewBlock(viewLoggedIn)
+    showViewFlex(navbar)
 }
  
  
-function showView(view) {
+function showViewFlex(view) {
     view.style.display = "flex"
 }
- 
+
+function showViewBlock(view) {
+    view.style.display = "block"
+}
  
 function hideView(view) {
     view.style.display = "none"
@@ -163,21 +143,6 @@ function hideView(view) {
 
 
 function showProfilePicture(imgElement, user) {
-    /*  Challenge:
-        Use the documentation to make this function work.
-       
-        This function has two parameters: imgElement and user
-       
-        We will call this function inside of onAuthStateChanged when the user is logged in.
-       
-        The function will be called with the following arguments:
-        showProfilePicture(userProfilePictureEl, user)
-       
-        If the user has a profile picture URL, set the src of imgElement to that URL.
-       
-        Otherwise, you should set the src of imgElement to "assets/images/default-profile-picture.jpeg"
-    */
-
     if (user.photoURL) {
         imgElement.src = user.photoURL
     } else {
@@ -187,43 +152,26 @@ function showProfilePicture(imgElement, user) {
 
 
 function showUserGreeting(element, user) {
-    /*  Challenge:
-        Use the documentation to make this function work.
-       
-        This function has two parameters: element and user
-       
-        We will call this function inside of onAuthStateChanged when the user is logged in.
-       
-        The function will be called with the following arguments:
-        showUserGreeting(userGreetingEl, user)
-       
-        If the user has a display name, then set the textContent of element to:
-        "Hi ___ ( your first name)"
-        Where __ is replaced with the actual first name of the user
-       
-        Otherwise, set the textContent of element to:
-        "Hey friend, how are you?"
-    */
-
-    if (user.displayName) {
-        element.textContent = `Hi ${user.displayName}`
-    } else {
-        element.textContent = "Hey friend, how are you?"
-    }
+    // if (user.displayName) {
+    //     element.textContent = `Hi ${user.displayName}`
+    // } else {
+    //     element.textContent = "Hey friend, how are you?"
+    // }
 }
 
 function clearInputField(field) {
     field.value = ""
 }
 
-function postButtonPressed() {
+async function postButtonPressed() {
     const postBody = textareaEl.value
     const user = auth.currentUser
     const time = serverTimestamp()
 
     if (postBody) {
-        addPostToDB(postBody, user, time)
-        addPostToWeb(postBody, user, time)
+        await addPostToDB(postBody, user, time)
+        document.getElementById("post-container").innerHTML = ""
+        getAllPosts()
         clearInputField(textareaEl)
     }
 }
@@ -245,36 +193,48 @@ async function addPostToDB(postBody, user, time) {
  
 console.log(app.options.projectId)
 
+async function getAllPosts() {
+    try {
+        const docRef = collection(db, "posts")
+        const snapshot = await getDocs(collection(db, "posts"))
+        console.log(snapshot)
+        snapshot.docs.forEach(doc => {
+            const postData = doc.data()
+            console.log(`Post ID: ${doc.id}`)
+            console.log(`Body: ${postData.body}`)
+            console.log(`User: ${postData.uid}`)
+            console.log(`Timestamp: ${new Date(postData.timestamp.seconds * 1000).toLocaleString()}`)
+            const timePosted = new Date(postData.timestamp.seconds * 1000).toLocaleString()
+
+            addPostToWeb(postData.body, postData.uid, timePosted)
+            
+        })
+    } catch (error) {
+        console.error(error)
+    }
+    
+}
+  
+  
 function addPostToWeb(postBody, user, time) {
+    let postContainer = document.getElementById("post-container")
+
+    let post = document.createElement("div")
+    post.className = "post"
     
-    let post = document.getElementById("post")
+    let username = document.createElement("h3")
+    username.textContent = user
 
-    let username = document.getElementById("user")
-    console.log(user.uid)
-    username.textContent = user.uid
+    let contentOfPost = document.createElement("p")
+    contentOfPost.textContent = postBody
 
-    let postDescription = document.getElementById("body")
-    postDescription.textContent = postBody
+    let timePosted = document.createElement("p")
+    timePosted.textContent = time
 
-    let timePosted = document.getElementById("timePosted")
-
-    const date = new Date(time.toString())
-    timePosted.textContent = date
-    // let post = document.createElement("div")
-    // post.innerHTML = "<p>test</p>"
-    // post.className = "post-container"
-    // let username = document.createElement("h1")
-    // username.textContent = user.uid
-    // let contentOfPost = document.createElement("p")
-    // contentOfPost.textContent = postBody
-    // document.createElement("div")
-
-
-
-    document.appendChild(post)
-    
-    
-
+    postContainer.append(post)
+    post.append(username)
+    post.append(contentOfPost)
+    post.append(timePosted)
 }
 
 // Main Code
@@ -289,4 +249,30 @@ onAuthStateChanged(auth, (user) => {
 })
 
 
+// Display all posts when the page loads
+window.onload = () => {
+    getAllPosts();
+};
+
+
 //credit: coursera
+
+function ChangeAngry() {
+    document.getElementById("user-profile-picture").src = "assets/emojis/AngryEmoji.webp";
+}
+ 
+ 
+function ChangeGoofy() {
+    document.getElementById("user-profile-picture").src = "assets/emojis/GoofyEmoji.webp";
+}
+ 
+ 
+function ChangeHappy() {
+    document.getElementById("user-profile-picture").src = "assets/emojis/HappyEmoji.png";
+}
+ 
+ 
+function ChangeSad() {
+    document.getElementById("user-profile-picture").src = "assets/emojis/SadEmoji.png";
+}
+ 
