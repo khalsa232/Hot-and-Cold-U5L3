@@ -112,7 +112,7 @@ function authSignOut() {
             console.error(error)
         })
 }
- 
+
 
 /* == Functions - UI Functions == */
 function showLoggedOutView() {
@@ -120,15 +120,15 @@ function showLoggedOutView() {
     showViewFlex(viewLoggedOut)
     hideView(navbar)
 }
- 
- 
+
+
 function showLoggedInView() {
     hideView(viewLoggedOut)
     showViewBlock(viewLoggedIn)
     showViewFlex(navbar)
 }
- 
- 
+
+
 function showViewFlex(view) {
     view.style.display = "flex"
 }
@@ -136,7 +136,7 @@ function showViewFlex(view) {
 function showViewBlock(view) {
     view.style.display = "block"
 }
- 
+
 function hideView(view) {
     view.style.display = "none"
 }
@@ -175,7 +175,7 @@ async function postButtonPressed() {
         clearInputField(textareaEl)
     }
 }
- 
+
 /* = Functions - Firebase - Cloud Firestore = */
 async function addPostToDB(postBody, user, time) {
     try {
@@ -189,8 +189,8 @@ async function addPostToDB(postBody, user, time) {
         console.error(error.message)
     }
 }
- 
- 
+
+
 console.log(app.options.projectId)
 
 async function getAllPosts() {
@@ -207,21 +207,21 @@ async function getAllPosts() {
             const timePosted = new Date(postData.timestamp.seconds * 1000).toLocaleString()
 
             addPostToWeb(postData.body, postData.uid, timePosted)
-            
+
         })
     } catch (error) {
         console.error(error)
     }
-    
+
 }
-  
-  
+
+
 function addPostToWeb(postBody, user, time) {
     let postContainer = document.getElementById("post-container")
 
     let post = document.createElement("div")
     post.className = "post"
-    
+
     let username = document.createElement("h3")
     username.textContent = user
 
@@ -257,22 +257,19 @@ window.onload = () => {
 
 //credit: coursera
 
-function ChangeAngry() {
+window.ChangeAngry = function () {
     document.getElementById("user-profile-picture").src = "assets/emojis/AngryEmoji.webp";
-}
- 
- 
-function ChangeGoofy() {
+};
+
+window.ChangeGoofy = function () {
     document.getElementById("user-profile-picture").src = "assets/emojis/GoofyEmoji.webp";
-}
- 
- 
-function ChangeHappy() {
+};
+
+window.ChangeHappy = function () {
     document.getElementById("user-profile-picture").src = "assets/emojis/HappyEmoji.png";
-}
- 
- 
-function ChangeSad() {
+};
+
+window.ChangeSad = function () {
     document.getElementById("user-profile-picture").src = "assets/emojis/SadEmoji.png";
-}
- 
+};
+
